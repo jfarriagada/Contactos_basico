@@ -1,16 +1,22 @@
 package com.example.konarr.contactos.util;
 
+import android.net.Uri;
+
+import java.net.URI;
+
 /**
  * Created by konarr on 23-09-14.
  */
 public class contacto {
     private String nombre, telefono, email, direcccion;
+    private Uri image_uri;
 
-    public contacto(String nombre, String telefono, String email, String direcccion) {
+    public contacto(String nombre, String telefono, String email, String direcccion, Uri image_uri) {
         this.nombre = nombre;
         this.telefono = telefono;
         this.email = email;
         this.direcccion = direcccion;
+        this.image_uri = image_uri;
     }
 
     //<editor-fold desc="GETTER METHODS">
@@ -29,6 +35,10 @@ public class contacto {
     public String getDirecccion() {
         return direcccion;
     }
+
+    public Uri getImage_uri() {
+        return image_uri;
+    }
     //</editor-fold>
 
 
@@ -46,5 +56,9 @@ public class contacto {
 
     public void setDirecccion(String direcccion) {
         this.direcccion = direcccion;
+    }
+
+    public void setImage_uri(Uri image_uri) {
+        this.image_uri = image_uri;
     }
 }

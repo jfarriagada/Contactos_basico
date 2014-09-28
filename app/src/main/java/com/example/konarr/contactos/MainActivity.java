@@ -1,27 +1,35 @@
 package com.example.konarr.contactos;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.example.konarr.contactos.util.contactListAdapter;
 import com.example.konarr.contactos.util.textChangedListener;
 import com.example.konarr.contactos.util.contacto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+//toda info de contacto se agrega al adapter
 public class MainActivity extends Activity {
 
     private EditText txt_nombre, txt_telefono, txt_email, txt_direccion;
-    private List<contacto> contactos = new ArrayList<contacto>();
+    private ArrayAdapter<contacto> adapter;
+    private ImageView img_contacto;
     private ListView contactsListView;
     private Button btn_agregar;
+    private int request_code = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +38,13 @@ public class MainActivity extends Activity {
 
         //alt+enter para crear el metodo
         inicializarComponentesUI();
+        inicializarListaContactos();
         inicializarTabs();
+    }
+
+    private void inicializarListaContactos() {
+        adapter = new contactListAdapter(this, new ArrayList<contacto>());
+        contactsListView.setAdapter(adapter);
     }
 
     private void inicializarTabs() {
@@ -53,6 +67,7 @@ public class MainActivity extends Activity {
         txt_telefono = (EditText) findViewById(R.id.txt_telefono);
         txt_email = (EditText) findViewById(R.id.txt_email);
         txt_direccion = (EditText) findViewById(R.id.txt_direccion);
+        img_contacto = (ImageView) findViewById(R.id.img_contacto);
         //se ejecuta cada vez que el user escribe o realiza algo
         txt_nombre.addTextChangedListener(new textChangedListener(){
             @Override
@@ -69,21 +84,20 @@ public class MainActivity extends Activity {
           txt_nombre.getText().toString(),
           txt_telefono.getText().toString(),
             txt_email.getText().toString(),
-            txt_direccion.getText().toString()
+            txt_direccion.getText().toString(),
+            //obtenemos el atributo TAG con la Uri de la imagen
+            //TAG es un object y puede almacenar cualquier cosa
+            (Uri) img_contacto.getTag()
         );
         String msg = String.format("%s ha sido agregado.", txt_nombre.getText());
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         btn_agregar.setEnabled(false);
-        inicializarListViews();
         limpiarCampos();
     }
 
-    private void inicializarListViews() {
-
-    }
-
-    private void agregarContactos(String nombre, String telefono, String email, String direcccion) {
-        contactos.add(new contacto(nombre, telefono, email, direcccion));
+    private void agregarContactos(String nombre, String telefono, String email, String direcccion, Uri image_uri) {
+        contacto c = new contacto(nombre, telefono, email, direcccion, image_uri);
+        adapter.add(c);
     }
 
     private void limpiarCampos() {
@@ -91,9 +105,33 @@ public class MainActivity extends Activity {
         txt_telefono.getText().clear();
         txt_email.getText().clear();
         txt_direccion.getText().clear();
+        //reestablecer la imagen predeterminada del contacto
+        img_contacto.setImageResource(R.drawable.ic_imgcontacto);
         txt_nombre.requestFocus();
     }
 
+    public void onImgClick(View view) {
+        Intent intent = null;
+        //verificando la version de la plataforma
+        if(Build.VERSION.SDK_INT < 19){
+            //android JellyBean 4.3 y anteriores
+            intent = new Intent();
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+        }else {
+            //android kitkat 4.4 o superior
+        }
+        intent.setType("image/*");
+        startActivityForResult(intent, request_code);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK && requestCode == request_code){
+            img_contacto.setImageURI(data.getData());
+            //utilizamos el atributo TAG para almacenar la Uri al archivo seleccionado
+            img_contacto.setTag(data.getData());
+        }
+    }
 
 
 
